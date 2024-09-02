@@ -10,7 +10,7 @@ export const fetchRecommendations = async (
 ) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_EFP_API_URL}/${
+      `$https://development.api.ethfollow.xyz//${
         endpoint === 'recommended'
           ? addressOrName
             ? `${list ? 'lists' : 'users'}/${

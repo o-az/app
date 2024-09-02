@@ -28,14 +28,14 @@ export const fetchProfileFollowers = async ({
 
     const url =
       list !== undefined
-        ? `${process.env.NEXT_PUBLIC_EFP_API_URL}/lists/${list}/${
+        ? `$https://development.api.ethfollow.xyz//lists/${list}/${
             allResults
               ? 'allFollowers'
               : search && search?.length >= 3
                 ? 'searchFollowers'
                 : 'followers'
           }?${queryParams}`
-        : `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${addressOrName}/${
+        : `$https://development.api.ethfollow.xyz//users/${addressOrName}/${
             allResults
               ? 'allFollowers'
               : search && search?.length >= 3

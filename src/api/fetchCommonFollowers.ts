@@ -9,7 +9,7 @@ export const noCommonFollowers = {
 export const fetchCommonFollowers = async (user: Address, addressOrName: string) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${user}/commonFollowers?leader=${addressOrName}`,
+      `$https://development.api.ethfollow.xyz//users/${user}/commonFollowers?leader=${addressOrName}`,
       {
         cache: 'default',
         headers: {

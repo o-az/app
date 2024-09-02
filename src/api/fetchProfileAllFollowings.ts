@@ -3,7 +3,7 @@ import type { Address } from 'viem'
 export const fetchProfileAllFollowings = async (list: number) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_EFP_API_URL}/lists/${list}/allFollowingAddresses`,
+      `$https://development.api.ethfollow.xyz//lists/${list}/allFollowingAddresses`,
       {
         cache: 'default',
         headers: {

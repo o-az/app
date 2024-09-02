@@ -10,8 +10,8 @@ export const nullFollowerTags = {
 export const fetchFollowerTags = async (addressOrName: string, list?: number | string) => {
   try {
     const url = list
-      ? `${process.env.NEXT_PUBLIC_EFP_API_URL}/lists/${list}/taggedAs`
-      : `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${addressOrName}/taggedAs`
+      ? `$https://development.api.ethfollow.xyz//lists/${list}/taggedAs`
+      : `$https://development.api.ethfollow.xyz//users/${addressOrName}/taggedAs`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

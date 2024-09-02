@@ -194,7 +194,9 @@ const useListSettings = ({ profile, list }: { profile: ProfileDetailsResponse; l
   const { data: listState, isLoading: isListStateLoading } = useQuery({
     queryKey: ['list state', list],
     queryFn: async () => {
-      const listStateReq = await fetch(`${process.env.NEXT_PUBLIC_EFP_API_URL}/exportState/${list}`)
+      const listStateReq = await fetch(
+        `$https://development.api.ethfollow.xyz//exportState/${list}`
+      )
       const listStateRes = await listStateReq.json()
       return listStateRes.following as FollowingResponse[]
     },

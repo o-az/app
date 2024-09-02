@@ -11,8 +11,8 @@ export const fetchFollowingTags = async (addressOrName: string, list?: number | 
   try {
     const url =
       list !== undefined
-        ? `${process.env.NEXT_PUBLIC_EFP_API_URL}/lists/${list}/tags`
-        : `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${addressOrName}/tags`
+        ? `$https://development.api.ethfollow.xyz//lists/${list}/tags`
+        : `$https://development.api.ethfollow.xyz//users/${addressOrName}/tags`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

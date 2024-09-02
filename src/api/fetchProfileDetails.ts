@@ -6,8 +6,8 @@ export const fetchProfileDetails = async (addressOrName: string, list?: number |
   try {
     const url =
       list !== undefined
-        ? `${process.env.NEXT_PUBLIC_EFP_API_URL}/lists/${list}/details`
-        : `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${addressOrName}/details`
+        ? `$https://development.api.ethfollow.xyz//lists/${list}/details`
+        : `$https://development.api.ethfollow.xyz//users/${addressOrName}/details`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

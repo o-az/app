@@ -2,7 +2,7 @@ import type { LeaderboardStatsResponse } from '#/types/requests'
 
 export const fetchLeaderboardStats = async () => {
   try {
-    const url = `${process.env.NEXT_PUBLIC_EFP_API_URL}/stats`
+    const url = `$https://development.api.ethfollow.xyz//stats`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

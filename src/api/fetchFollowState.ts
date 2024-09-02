@@ -24,9 +24,9 @@ export const fetchFollowState = async ({
         }
       }
 
-    const url = `${process.env.NEXT_PUBLIC_EFP_API_URL}/${list === undefined ? 'users' : 'lists'}/${
-      list ?? userAddress
-    }/${address}/${type === 'following' ? 'buttonState' : 'followerState'}`
+    const url = `$https://development.api.ethfollow.xyz//${
+      list === undefined ? 'users' : 'lists'
+    }/${list ?? userAddress}/${address}/${type === 'following' ? 'buttonState' : 'followerState'}`
 
     const response = await fetch(url, {
       cache: 'default',

@@ -3,7 +3,7 @@ import type { ProfileListsResponse } from '#/types/requests'
 export const fetchProfileLists = async (addressOrName: string) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${addressOrName}/lists`,
+      `$https://development.api.ethfollow.xyz//users/${addressOrName}/lists`,
       {
         cache: 'default',
         headers: {
