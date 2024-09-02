@@ -3,7 +3,7 @@ import type { Address } from 'viem'
 export const fetchProfileAllFollowings = async (list: number) => {
   try {
     const response = await fetch(
-      `$https://development.api.ethfollow.xyz//lists/${list}/allFollowingAddresses`,
+      `https://development.api.ethfollow.xyz/api/v1/lists/${list}/allFollowingAddresses`,
       {
         cache: 'default',
         headers: {

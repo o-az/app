@@ -18,8 +18,8 @@ export const fetchleaderboard = async ({
 
     const url =
       search && search.length > 2
-        ? `$https://development.api.ethfollow.xyz//leaderboard/search?term=${search}`
-        : `$https://development.api.ethfollow.xyz//leaderboard/ranked?${queryParams}`
+        ? `https://development.api.ethfollow.xyz/api/v1/leaderboard/search?term=${search}`
+        : `https://development.api.ethfollow.xyz/api/v1/leaderboard/ranked?${queryParams}`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

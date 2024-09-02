@@ -9,7 +9,7 @@ export const noCommonFollowers = {
 export const fetchCommonFollowers = async (user: Address, addressOrName: string) => {
   try {
     const response = await fetch(
-      `$https://development.api.ethfollow.xyz//users/${user}/commonFollowers?leader=${addressOrName}`,
+      `https://development.api.ethfollow.xyz/api/v1/users/${user}/commonFollowers?leader=${addressOrName}`,
       {
         cache: 'default',
         headers: {

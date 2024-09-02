@@ -3,7 +3,7 @@ import type { ProfileListsResponse } from '#/types/requests'
 export const fetchProfileLists = async (addressOrName: string) => {
   try {
     const response = await fetch(
-      `$https://development.api.ethfollow.xyz//users/${addressOrName}/lists`,
+      `https://development.api.ethfollow.xyz/api/v1/users/${addressOrName}/lists`,
       {
         cache: 'default',
         headers: {

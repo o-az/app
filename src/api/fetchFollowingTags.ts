@@ -11,8 +11,8 @@ export const fetchFollowingTags = async (addressOrName: string, list?: number | 
   try {
     const url =
       list !== undefined
-        ? `$https://development.api.ethfollow.xyz//lists/${list}/tags`
-        : `$https://development.api.ethfollow.xyz//users/${addressOrName}/tags`
+        ? `https://development.api.ethfollow.xyz/api/v1/lists/${list}/tags`
+        : `https://development.api.ethfollow.xyz/api/v1/users/${addressOrName}/tags`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

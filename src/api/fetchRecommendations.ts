@@ -10,7 +10,7 @@ export const fetchRecommendations = async (
 ) => {
   try {
     const res = await fetch(
-      `$https://development.api.ethfollow.xyz//${
+      `https://development.api.ethfollow.xyz/api/v1/${
         endpoint === 'recommended'
           ? addressOrName
             ? `${list ? 'lists' : 'users'}/${

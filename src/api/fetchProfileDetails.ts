@@ -6,8 +6,8 @@ export const fetchProfileDetails = async (addressOrName: string, list?: number |
   try {
     const url =
       list !== undefined
-        ? `$https://development.api.ethfollow.xyz//lists/${list}/details`
-        : `$https://development.api.ethfollow.xyz//users/${addressOrName}/details`
+        ? `https://development.api.ethfollow.xyz/api/v1/lists/${list}/details`
+        : `https://development.api.ethfollow.xyz/api/v1/users/${addressOrName}/details`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

@@ -32,7 +32,7 @@ export function generateMetadata({ params }: Props): Metadata {
 
   // try {
   //   const response = (await fetch(
-  //     `$https://development.api.ethfollow.xyz//${isList ? 'lists' : 'users'}/${user}/account`
+  //     `https://development.api.ethfollow.xyz/api/v1/${isList ? 'lists' : 'users'}/${user}/account`
   //   ).then(res => res.json())) as AccountResponseType
 
   //   const fetchedUser =

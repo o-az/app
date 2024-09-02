@@ -195,7 +195,7 @@ const useListSettings = ({ profile, list }: { profile: ProfileDetailsResponse; l
     queryKey: ['list state', list],
     queryFn: async () => {
       const listStateReq = await fetch(
-        `$https://development.api.ethfollow.xyz//exportState/${list}`
+        `https://development.api.ethfollow.xyz/api/v1/exportState/${list}`
       )
       const listStateRes = await listStateReq.json()
       return listStateRes.following as FollowingResponse[]

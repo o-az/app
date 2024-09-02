@@ -2,7 +2,7 @@ import type { LeaderboardStatsResponse } from '#/types/requests'
 
 export const fetchLeaderboardStats = async () => {
   try {
-    const url = `$https://development.api.ethfollow.xyz//stats`
+    const url = `https://development.api.ethfollow.xyz/api/v1/stats`
     const response = await fetch(url, {
       cache: 'default',
       headers: {

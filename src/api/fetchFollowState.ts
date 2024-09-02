@@ -24,7 +24,7 @@ export const fetchFollowState = async ({
         }
       }
 
-    const url = `$https://development.api.ethfollow.xyz//${
+    const url = `https://development.api.ethfollow.xyz/api/v1/${
       list === undefined ? 'users' : 'lists'
     }/${list ?? userAddress}/${address}/${type === 'following' ? 'buttonState' : 'followerState'}`
 
