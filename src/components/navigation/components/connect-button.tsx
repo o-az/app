@@ -95,7 +95,7 @@ const ConnectButton = () => {
                 className='rounded-full'
                 unoptimized={true}
               />
-              <p className='font-semibold hidden sm:block truncate text-lg'>
+              <p className='font-bold hidden sm:block truncate text-lg'>
                 {ensProfile?.name || truncateAddress(userAddress)}
               </p>
             </div>
@@ -105,13 +105,64 @@ const ConnectButton = () => {
           </>
         ) : (
           <div className='w-full sm:w-54 h-full flex items-center justify-center rounded-full'>
-            <p className='hidden sm:block font-semibold text-lg text-nowrap px-1'>{t('connect')}</p>
+            <p className='hidden sm:block font-bold text-lg text-nowrap px-1'>{t('connect')}</p>
             <HiOutlineWallet className='text-4xl w-[46px] block sm:hidden' />
           </div>
         )}
       </button>
       {walletMenOpenu && (
         <div className='p-1 flex w-[190px] z-50 shadow-md border-[3px] rounded-lg dark:bg-darkGrey/95 bg-white/95 border-zinc-200 dark:border-zinc-500 absolute top-[120%] flex-col items-end right-0'>
+          <ThemeSwitcher connected={true} closeMenu={() => setWalletMenuOpen(false)} />
+          <div ref={clickAwayLanguageRef} className='w-full cursor-pointer group relative'>
+            <div
+              onClick={() => setLanguageMenuOpen(!languageMenOpenu)}
+              className='flex justify-between p-3 rounded-md group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/20 items-center w-full'
+            >
+              <FiArrowLeft className='text-xl' />
+              <div className='flex gap-2'>
+                <Image src={selectedLanguage?.icon || ''} alt='Language icon' width={24} />
+                <p className='font-bold '>{selectedLanguage?.language}</p>
+              </div>
+            </div>
+            <div
+              className={`absolute -right-[14.6%] sm:right-[95%] -top-[54px] sm:-top-[6px] ${
+                languageMenOpenu ? 'block' : 'hidden'
+              } group-hover:block pr-5`}
+            >
+              <div className='flex flex-col gap-2 min-w-[190px] bg-white/90 dark:bg-darkGrey/90 border-[3px] border-zinc-200 dark:border-zinc-500 p-1 rounded-lg shadow-md'>
+                <div
+                  onClick={() => setLanguageMenuOpen(false)}
+                  className='flex sm:hidden justify-between items-center w-full group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/60 dark:hover:bg-zinc-400/20 p-3 rounded-md transition-opacity cursor-pointer'
+                >
+                  <FiArrowLeft className='w-8 font-bold' />
+                  <p className=' font-bold'>Back</p>
+                </div>
+                {LANGUAGES.map(lang => (
+                  <div
+                    className='p-3 pl-8 relative font-bold rounded-md hover:bg-slate-100 dark:hover:bg-zinc-400/20 transition-colors'
+                    key={lang.language}
+                    onClick={() => {
+                      changeLanguage(lang)
+                      setWalletMenuOpen(false)
+                    }}
+                  >
+                    {selectedLanguage && selectedLanguage.key === lang.key && (
+                      <Image
+                        src={GreenCheck}
+                        alt='List selected'
+                        width={16}
+                        className='absolute left-2 top-[17px]'
+                      />
+                    )}
+                    <div className='flex gap-2 pr-3'>
+                      <Image src={lang.icon} alt='Language icon' width={24} />
+                      <p>{lang.language}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
           {lists?.lists && lists.lists.length > 0 && (
             <div ref={clickAwayListRef} className='w-full cursor-pointer group relative'>
               <div
@@ -119,7 +170,7 @@ const ConnectButton = () => {
                 className='flex justify-between items-center w-full group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/20 p-3 rounded-md transition-opacity cursor-pointer'
               >
                 <FiArrowLeft className='text-xl' />
-                <p className=' font-semibold'>
+                <p className=' font-bold'>
                   {selectedList ? `${t('list')} #${selectedList}` : t('mint new list')}
                 </p>
               </div>
@@ -138,7 +189,7 @@ const ConnectButton = () => {
                     className='flex sm:hidden justify-between items-center w-full group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/20  dark:hover:bg-zinc-400/20 p-3 rounded-md transition-opacity cursor-pointer'
                   >
                     <FiArrowLeft className='text-xl' />
-                    <p className=' font-semibold'>Back</p>
+                    <p className=' font-bold'>Back</p>
                   </div>
                   {lists?.lists?.map(list => (
                     <div
@@ -159,7 +210,7 @@ const ConnectButton = () => {
                           className='absolute left-2 top-[17px]'
                         />
                       )}
-                      <p className='text-nowrap font-semibold'>{`${t('list')} #${list}`}</p>
+                      <p className='text-nowrap font-bold'>{`${t('list')} #${list}`}</p>
                       {lists.primary_list === list && (
                         <p className='mb-0.5 text-sm italic text-nowrap font-medium text-zinc-400'>
                           - Primary
@@ -185,65 +236,14 @@ const ConnectButton = () => {
                         className='absolute left-2 top-[17px]'
                       />
                     )}
-                    <p className='text-nowrap font-semibold'>{t('mint new list')}</p>
+                    <p className='text-nowrap font-bold'>{t('mint new list')}</p>
                   </div>
                 </div>
               </div>
             </div>
           )}
-          <div ref={clickAwayLanguageRef} className='w-full cursor-pointer group relative'>
-            <div
-              onClick={() => setLanguageMenuOpen(!languageMenOpenu)}
-              className='flex justify-between p-3 rounded-md group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/20 items-center w-full'
-            >
-              <FiArrowLeft className='text-xl' />
-              <div className='flex gap-2'>
-                <Image src={selectedLanguage?.icon || ''} alt='Language icon' width={24} />
-                <p className='font-semibold '>{selectedLanguage?.language}</p>
-              </div>
-            </div>
-            <div
-              className={`absolute -right-[14.6%] sm:right-[95%] -top-[54px] sm:-top-[6px] ${
-                languageMenOpenu ? 'block' : 'hidden'
-              } group-hover:block pr-5`}
-            >
-              <div className='flex flex-col gap-2 min-w-[190px] bg-white/90 dark:bg-darkGrey/90 border-[3px] border-zinc-200 dark:border-zinc-500 p-1 rounded-lg shadow-md'>
-                <div
-                  onClick={() => setLanguageMenuOpen(false)}
-                  className='flex sm:hidden justify-between items-center w-full group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/60 dark:hover:bg-zinc-400/20 p-3 rounded-md transition-opacity cursor-pointer'
-                >
-                  <FiArrowLeft className='w-8 font-bold' />
-                  <p className=' font-semibold'>Back</p>
-                </div>
-                {LANGUAGES.map(lang => (
-                  <div
-                    className='p-3 pl-8 relative font-semibold rounded-md hover:bg-slate-100 dark:hover:bg-zinc-400/20 transition-colors'
-                    key={lang.language}
-                    onClick={() => {
-                      changeLanguage(lang)
-                      setWalletMenuOpen(false)
-                    }}
-                  >
-                    {selectedLanguage && selectedLanguage.key === lang.key && (
-                      <Image
-                        src={GreenCheck}
-                        alt='List selected'
-                        width={16}
-                        className='absolute left-2 top-[17px]'
-                      />
-                    )}
-                    <div className='flex gap-2 pr-3'>
-                      <Image src={lang.icon} alt='Language icon' width={24} />
-                      <p>{lang.language}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <ThemeSwitcher connected={true} closeMenu={() => setWalletMenuOpen(false)} />
           <p
-            className='text-red-500 p-3 text-right font-semibold w-full text-nowrap rounded-md hover:bg-slate-100 dark:hover:bg-zinc-400/20 transition-opacity cursor-pointer'
+            className='text-red-500 p-3 text-right font-bold w-full text-nowrap rounded-md hover:bg-slate-100 dark:hover:bg-zinc-400/20 transition-opacity cursor-pointer'
             onClick={() => {
               disconnect()
               setWalletMenuOpen(false)

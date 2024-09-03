@@ -59,7 +59,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ connected, closeMenu }) =
           <p className={cn(connected ? 'text-2xl' : 'text-3xl')}>
             {themesWithIcons.find(({ theme }) => theme === selectedTheme)?.icon}
           </p>
-          {connected && <p className='capitalize font-semibold'>{t(selectedTheme || 'system')}</p>}
+          {connected && <p className='capitalize font-bold'>{t(selectedTheme || 'system')}</p>}
         </div>
       </div>
       <div
@@ -74,10 +74,13 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ connected, closeMenu }) =
         <div className='flex flex-col gap-2 w-full min-w-[190px] max-h-[75vh] sm:max-h-[80vh] overflow-scroll border-[3px] rounded-lg bg-white/90 dark:bg-darkGrey/90 border-zinc-200 dark:border-zinc-500 p-1  shadow-md'>
           <div
             onClick={() => setThemeMenuOpen(false)}
-            className='flex sm:hidden  justify-between items-center w-full group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/20  dark:hover:bg-zinc-400/20 p-3 rounded-md transition-opacity cursor-pointer'
+            className={cn(
+              'flex sm:hidden justify-between items-center w-full group-hover:bg-slate-100 dark:group-hover:bg-zinc-400/20  dark:hover:bg-zinc-400/20 p-3 rounded-md transition-opacity cursor-pointer',
+              connected ? 'flex sm:hidden' : 'hidden'
+            )}
           >
             <FiArrowLeft className='text-xl' />
-            <p className='font-semibold'>Back</p>
+            <p className='font-bold'>Back</p>
           </div>
           {themesWithIcons.map(({ theme, icon }) => (
             <div
@@ -86,6 +89,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ connected, closeMenu }) =
               onClick={() => {
                 setTheme(theme as ThemeType)
                 setThemeMenuOpen(false)
+                closeMenu?.()
               }}
             >
               {selectedTheme === theme && (
@@ -97,7 +101,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ connected, closeMenu }) =
                 />
               )}
               <p className={connected ? 'text-2xl' : 'text-3xl'}>{icon}</p>
-              <p className='text-nowrap capitalize font-semibold'>{t(theme)}</p>
+              <p className='text-nowrap capitalize font-bold'>{t(theme)}</p>
             </div>
           ))}
         </div>
