@@ -12,12 +12,12 @@ import type {
 } from '#/types/requests'
 import { cn } from '#/lib/utilities'
 import Recommendations from '../recommendations'
-import { BLOCKED_MUTED_TABS, FETCH_LIMIT_PARAM } from '#/lib/constants'
 import TableHeader from './components/table-headers'
 import { FollowList } from '#/components/follow-list'
 import { useIsEditView } from '#/hooks/use-is-edit-view'
 import type { ProfileTableTitleType } from '#/types/common'
 import { useEFPProfile } from '#/contexts/efp-profile-context'
+import { BLOCKED_MUTED_TABS, FETCH_LIMIT_PARAM } from '#/lib/constants'
 
 /**
  * TODO: paginate
@@ -79,6 +79,10 @@ export function UserProfilePageTable({
       }, 500)
     }
   }
+
+  useEffect(() => {
+    setSearchFilter(search)
+  }, [])
 
   useEffect(() => {
     if (!showTags) setSelectedTags(isShowingBlocked ? ['All'] : [])
@@ -193,8 +197,9 @@ export function UserProfilePageTable({
         <div ref={loadMoreRef} className='h-px w-full' />
         {title === 'following' && isProfile && lists?.lists && lists.lists.length === 0 && (
           <Recommendations
+            limit={40}
             endpoint='recommended'
-            description='Those are recommended profiles and not people you follow'
+            header={t('recommendations')}
             className='py-2'
           />
         )}

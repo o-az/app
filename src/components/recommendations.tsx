@@ -13,19 +13,12 @@ import PageSelector from '#/app/leaderboard/components/page-selector'
 
 interface RecommendationsProps {
   header?: string
-  description?: string
   className?: string
   limit?: number
   endpoint: 'discover' | 'recommended'
 }
 
-const Recommendations = ({
-  header,
-  description,
-  className,
-  limit = 10,
-  endpoint
-}: RecommendationsProps) => {
+const Recommendations = ({ header, className, limit = 10, endpoint }: RecommendationsProps) => {
   const [page, setPage] = useState(1)
   const { selectedList } = useEFPProfile()
   const { address: userAddress } = useAccount()
@@ -85,14 +78,12 @@ const Recommendations = ({
             setPage={setPage}
             hasNextPage={hasNextPage && !(isFetchingNextPage || isLoading) && page <= 10}
             hasSkipToFirst={false}
-            scrollOnChange={false}
             adjustUrl={false}
             displayPageNumber={false}
             fetchNext={fetchNextPage}
             fetchPrevious={fetchPreviousPage}
           />
         </div>
-        <p className='text-center text-xs text-zinc-400 italic font-medium'>{description}</p>
       </div>
       <FollowList
         isLoading={isLoading || isFetchingNextPage || isFetchingPreviousPage}
@@ -130,7 +121,6 @@ const Recommendations = ({
             hasNextPage={hasNextPage && !(isFetchingNextPage || isLoading) && page <= 10}
             hasSkipToFirst={false}
             adjustUrl={false}
-            scrollOnChange={false}
             displayPageNumber={false}
             fetchNext={fetchNextPage}
             fetchPrevious={fetchPreviousPage}

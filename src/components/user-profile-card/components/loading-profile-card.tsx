@@ -3,7 +3,6 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 
 import LoadingCell from '../../loaders/loading-cell'
 import { profileCardSocials } from '#/lib/constants'
-import Image from 'next/image'
 
 interface LoadingProfileCardProps {
   isResponsive?: boolean
@@ -17,6 +16,7 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
   isStatic
 }) => {
   const { t } = useTranslation()
+  // const { resolvedTheme } = useTheme()
   const { openConnectModal } = useConnectModal()
 
   const ranks = ['mutuals_rank', 'followers_rank', 'following_rank', 'blocks_rank']
@@ -38,6 +38,8 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
       <div className='pointer-events-none text-zinc-500 absolute flex justify-start px-2 w-full left-0 top-1 font-bold'>
         <LoadingCell isStatic={isStatic} className='w-10 h-5 mt-1 rounded-lg' />
       </div>
+      <LoadingCell className='w-full h-[120px] absolute top-0 left-0 -z-10' />
+
       <div
         className={`pointer-events-none flex w-full xl:items-center flex-col pt-8 px-4 sm:p-6 sm:pt-9 pb-6 ${
           isResponsive ? 'gap-5 sm:gap-6 md:gap-10' : 'gap-[68px]'
@@ -56,15 +58,22 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
                 <LoadingCell isStatic={isStatic} className='w-[107px] h-9 rounded-lg' />
               )}
             </div>
-            <div className='flex gap-2 items-center opacity-20'>
+            <LoadingCell isStatic={isStatic} className='w-4/5 h-5 rounded-lg' />
+            <div className='flex gap-2 items-center'>
               {profileCardSocials.map(social => (
-                <Image
+                <LoadingCell
                   key={social.name}
-                  src={social.icon}
-                  alt={social.name}
-                  width={37}
-                  height={37}
+                  isStatic={isStatic}
+                  className='w-9 h-9 rounded-full'
                 />
+                // <Image
+                //   key={social.name}
+                //   src={social.icon(resolvedTheme || '')}
+                //   alt={social.name}
+                //   width={36}
+                //   height={36}
+                //   className='rounded-full'
+                // />
               ))}
             </div>
           </div>

@@ -7,13 +7,12 @@ import Modal from '#/components/modal'
 import { Avatar } from '#/components/avatar'
 import { truncateAddress } from '#/lib/utilities'
 import { formatNumber } from '#/utils/formatNumber'
-import LensIcon from 'public/assets/icons/lens.svg'
-import LoadingCell from '#/components/loaders/loading-cell'
 import useImportModal from '../hooks/useImportModal'
-import CancelButton from '#/components/buttons/cancel-button'
 import type { ImportPlatformType } from '#/types/common'
-import { PrimaryButton } from '#/components/buttons/primary-button'
+import LoadingCell from '#/components/loaders/loading-cell'
 import FarcasterIcon from 'public/assets/icons/farcaster.svg'
+import CancelButton from '#/components/buttons/cancel-button'
+import { PrimaryButton } from '#/components/buttons/primary-button'
 
 interface ImportModalprops {
   onClose: () => void
@@ -28,7 +27,9 @@ const ImportModal: React.FC<ImportModalprops> = ({ onClose, platform }) => {
     socialProfile,
     alreadyFollow,
     onAddFollowings,
+    onlyImportWithEns,
     isFollowingsLoading,
+    setOnlyImportWithEns,
     isSocialProfileLoading
   } = useImportModal(platform)
   const { t } = useTranslation()
@@ -42,7 +43,7 @@ const ImportModal: React.FC<ImportModalprops> = ({ onClose, platform }) => {
             <span className='capitalize'>{platform}</span>
           </p>
           <Image
-            src={platform === 'lens' ? LensIcon : FarcasterIcon}
+            src={FarcasterIcon}
             alt='Import from Farcaster'
             className='rounded-lg'
             width={30}
@@ -56,7 +57,7 @@ const ImportModal: React.FC<ImportModalprops> = ({ onClose, platform }) => {
             spellCheck={false}
             autoComplete='off'
             value={currHandle}
-            placeholder={`${t('enter')} ${platform} ID`}
+            placeholder={`${t('enter')} ${platform} Name`}
             onChange={e => setCurrHandle(e.target.value)}
             className='h-12 block pr-12 w-full truncate font-medium rounded-xl border-[3px] 3 dark:border-zinc-500 pl-4 sm:text-sm bg-white/70 dark:bg-darkGrey/50'
           />
@@ -82,12 +83,12 @@ const ImportModal: React.FC<ImportModalprops> = ({ onClose, platform }) => {
                 ) : (
                   <p className='text-lg font-bold'>
                     @
-                    {socialProfile.profileName?.replace('lens/@', '') ||
+                    {socialProfile.profileName ||
                       truncateAddress(socialProfile.userAssociatedAddresses?.[0])}
                   </p>
                 )}
                 <p className='font-medium text-zinc-400 dark:text-zinc-300 capitalize'>
-                  {platform} ID
+                  {platform} Name
                 </p>
               </div>
             </div>
@@ -123,6 +124,15 @@ const ImportModal: React.FC<ImportModalprops> = ({ onClose, platform }) => {
                     {formatNumber(followings.length - alreadyFollow.length)} {t('accounts')}
                   </p>
                 )}
+              </div>
+              <div className='flex items-center w-full justify-between gap-3 sm:gap-5'>
+                <p className='text-lg font-bold'>{t('Only import accounts with an ENS name')}</p>
+                <input
+                  className='toggle'
+                  type='checkbox'
+                  defaultChecked={onlyImportWithEns}
+                  onChange={e => setOnlyImportWithEns(e.target.checked)}
+                />
               </div>
             </div>
           </div>

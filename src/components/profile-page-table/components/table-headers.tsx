@@ -13,6 +13,7 @@ import GreenCheck from 'public/assets/icons/check-green.svg'
 import type { FollowSortType, TagCountType } from '#/types/requests'
 import { QUERY_BLOCK_TAGS } from '#/components/blocked-muted/hooks/use-blocked-muted'
 import { BLOCKED_MUTED_TABS, BLOCKED_MUTED_TAGS, SORT_OPTIONS } from '#/lib/constants'
+import { cn } from '#/lib/utilities'
 
 interface TableHeaderProps {
   title: ProfileTableTitleType
@@ -64,11 +65,14 @@ const TableHeader: React.FC<TableHeaderProps> = ({
       <div className='flex justify-between w-full'>
         <div className='flex gap-4 justify-between items-center w-full'>
           <div className='flex gap-3 items-center'>
-            <p className='capitalize text-lg sm:text-3xl font-bold'>{t(title)}</p>
+            <h2 className='capitalize text-lg sm:text-3xl font-bold'>{t(title)}</h2>
             {!BLOCKED_MUTED_TABS.includes(title) && (
-              <div ref={clickAwaySearchRef} className='relative flex gap-3 z-50'>
+              <div ref={clickAwaySearchRef} className='relative flex gap-1 sm:gap-3 z-50'>
                 <div
-                  className='cursor-pointer max-w-40 flex items-center h-6 hover:scale-125 transition-all gap-2 hover:opacity-75'
+                  className={cn(
+                    'cursor-pointer max-w-40 flex items-center h-6 transition-all gap-2 hover:opacity-75',
+                    search ? 'hover:scale-[1.15]' : 'hover:scale-125'
+                  )}
                   onClick={() => setShowSearch(!showSearch)}
                 >
                   <FiSearch className='opacity-50 text-2xl hover:opacity-100 transition-opacity' />
@@ -95,6 +99,12 @@ const TableHeader: React.FC<TableHeaderProps> = ({
                       placeholder={t('search placeholder')}
                       onChange={e => {
                         setSearch(e.target.value.toLowerCase().trim())
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === 'Escape') {
+                          e.preventDefault()
+                          setShowSearch(false)
+                        }
                       }}
                       value={search}
                       className='font-medium py-3 block w-full rounded-lg border-0 border-transparent pl-3 pr-10 sm:text-sm dark:bg-darkGrey/50 bg-white/50'
@@ -173,7 +183,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
             displayedTags?.map((tag, i) => (
               <button
                 key={tag.tag + i}
-                className={`text-sm flex gap-1.5 px-4 py-2 font-bold items-center hover:scale-110 transition-transform ${
+                className={`text-sm flex gap-1.5 px-4 py-2 font-bold items-center max-w-full hover:scale-110 transition-transform ${
                   selectedTags?.includes(tag.tag)
                     ? 'text-darkGrey bg-zinc-100 shadow-inner shadow-black/10'
                     : 'text-zinc-500 bg-zinc-300/80'
@@ -181,7 +191,9 @@ const TableHeader: React.FC<TableHeaderProps> = ({
                 name={tag.tag.toLowerCase()}
                 onClick={() => toggleSelectedTags(title, tag.tag)}
               >
-                <p>{BLOCKED_MUTED_TAGS.includes(tag.tag) ? t(tag.tag) : tag.tag}</p>
+                <p className='max-w-[95%] truncate'>
+                  {BLOCKED_MUTED_TAGS.includes(tag.tag) ? t(tag.tag) : tag.tag}
+                </p>
                 <p className='text-xs text-zinc-400 dark:text-zinc-500'>
                   {formatNumber(tag.count)}
                 </p>

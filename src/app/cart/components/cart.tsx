@@ -12,7 +12,6 @@ import ImportModal from './import-modal'
 import { Search } from '#/components/search'
 import ClearCartModal from './clear-cart-modal'
 import { useCart } from '#/contexts/cart-context'
-import LensIcon from 'public/assets/icons/lens.svg'
 import { formatNumber } from '#/utils/formatNumber'
 import { FollowList } from '#/components/follow-list'
 import Recommendations from '#/components/recommendations'
@@ -20,12 +19,13 @@ import FarcasterIcon from 'public/assets/icons/farcaster.svg'
 import { useEFPProfile } from '#/contexts/efp-profile-context'
 import { PrimaryButton } from '#/components/buttons/primary-button'
 import { DEFAULT_CHAIN, LIST_OP_LIMITS } from '#/lib/constants/chain'
+import { cn } from '#/lib/utilities'
 
 const Cart = () => {
   const [isClient, setIsClient] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
   const [clearCartModalOpen, setClearCartModalOpen] = useState(false)
-  const [platform, setPlatform] = useState<'farcaster' | 'lens'>('farcaster')
+  const [platform, setPlatform] = useState<'farcaster'>('farcaster')
 
   useEffect(() => {
     setIsClient(true)
@@ -59,15 +59,15 @@ const Cart = () => {
         tags: []
       })),
       icon: FarcasterIcon
-    },
-    {
-      platform: 'lens',
-      profiles: socialAddresses.lens.map(address => ({
-        address,
-        tags: []
-      })),
-      icon: LensIcon
     }
+    // {
+    //   platform: 'lens',
+    //   profiles: socialAddresses.lens.map(address => ({
+    //     address,
+    //     tags: []
+    //   })),
+    //   icon: LensIcon
+    // }
   ]
 
   const transactionsCount = useMemo(() => {
@@ -110,7 +110,7 @@ const Cart = () => {
                     setPlatform('farcaster')
                   }}
                 />
-                <Image
+                {/* <Image
                   src={LensIcon}
                   alt='Import from Lens'
                   width={30}
@@ -119,7 +119,7 @@ const Cart = () => {
                     setImportModalOpen(true)
                     setPlatform('lens')
                   }}
-                />
+                /> */}
               </div>
             </div>
             <Search size='w-full z-50 px-2 pt-2' isEditor={true} />
@@ -130,7 +130,7 @@ const Cart = () => {
               <h3 className='font-bold text-left text-xl sm:text-3xl xxs:w-2/3'>
                 {t('cart unc-changes')}
               </h3>
-              {totalCartItems > 0 && (
+              {isClient && totalCartItems > 0 && (
                 <button
                   className='flex gap-2 cursor-pointer hover:scale-110 transition-transform items-center hover:opacity-80'
                   onClick={() => setClearCartModalOpen(true)}
@@ -156,8 +156,13 @@ const Cart = () => {
               canEditTags={roles?.isManager}
             />
           </div>
-          {isClient && totalCartItems > 0 && (
-            <div className='fixed md:w-fit w-full top-[85vh] sm:top-[85vh] lg:top-[82.5vh] right-0 px-4 lg:right-[5vw] flex justify-end'>
+          {isClient && (
+            <div
+              className={cn(
+                'fixed md:w-fit w-full top-[85vh] sm:top-[85vh] lg:top-[82.5vh] right-0 px-4 lg:right-[5vw] justify-end',
+                isClient && totalCartItems > 0 ? 'flex' : 'hidden'
+              )}
+            >
               <div className='flex gap-6 w-full border-[3px] border-zinc-200 dark:border-zinc-500 lg:w-fit items-center p-4 bg-white/10 justify-between glass-card bg-opacity-50 shadow-xl rounded-xl'>
                 <div className='flex flex-col gap-1 items-start'>
                   <div className='flex gap-2 items-center'>

@@ -15,7 +15,6 @@ import { useAccount, useChainId, useChains, useSwitchChain, useWalletClient } fr
 
 import { Step } from '#/components/checkout/types'
 import type { ChainWithDetails } from '#/lib/wagmi'
-import { DEFAULT_CHAIN, LIST_OP_LIMITS } from '#/lib/constants/chain'
 import { rpcProviders } from '#/lib/constants/providers'
 import type { FollowingResponse } from '#/types/requests'
 import { useEFPProfile } from '#/contexts/efp-profile-context'
@@ -23,6 +22,7 @@ import { useCart, type CartItem } from '#/contexts/cart-context'
 import { efpListRecordsAbi, efpListRegistryAbi } from '#/lib/abi'
 import { extractAddressAndTag, isTagListOp } from '#/utils/list-ops'
 import { useMintEFP } from '../../../hooks/efp-actions/use-mint-efp'
+import { DEFAULT_CHAIN, LIST_OP_LIMITS } from '#/lib/constants/chain'
 import { coreEfpContracts, ListRecordContracts } from '#/lib/constants/contracts'
 import { EFPActionType, useActions, type Action } from '#/contexts/actions-context'
 
@@ -55,7 +55,7 @@ const useCheckout = () => {
   const initialCurrentChainId = useChainId()
   const { address: userAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
-  const { totalCartItems, cartItems, resetCart } = useCart()
+  const { cartItems, resetCart, setCartItems } = useCart()
   const { mint, nonce: mintNonce, listHasBeenMinted } = useMintEFP()
 
   const [currentChainId, setCurrentChainId] = useState(initialCurrentChainId)
@@ -146,6 +146,12 @@ const useCheckout = () => {
 
       setListOpsFinished(true)
 
+      if (hash) {
+        setCartItems(cartItems.filter(item => !items.includes(item)))
+        queryClient.invalidateQueries({ queryKey: ['following'] })
+        queryClient.invalidateQueries({ queryKey: ['profile'] })
+      }
+
       // return transaction hash to enable following transaction status in transaction details component
       return hash
     },
@@ -197,7 +203,7 @@ const useCheckout = () => {
         ? [createEFPListAction]
         : [...cartItemActions, createEFPListAction]
     addActions(actionsToExecute)
-  }, [selectedChainId, setNewListAsPrimary, totalCartItems, listOpTx])
+  }, [selectedChainId, setNewListAsPrimary, listOpTx])
 
   useEffect(() => {
     setActions()
@@ -270,11 +276,9 @@ const useCheckout = () => {
   const onFinish = useCallback(() => {
     setIsRefetchingProfile(true)
     setIsRefetchingFollowing(true)
+    queryClient.invalidateQueries({ queryKey: ['top8'] })
     queryClient.invalidateQueries({ queryKey: ['follow state'] })
     queryClient.invalidateQueries({ queryKey: ['list state'] })
-
-    resetCart()
-    resetActions()
 
     if (listHasBeenMinted || selectedList === undefined) {
       refetchLists()
@@ -298,20 +302,53 @@ const useCheckout = () => {
     refetchFollowing()
     refetchFollowingTags()
 
+    resetCart()
+    resetActions()
     router.push(`/${selectedList ?? userAddress}`)
   }, [resetActions, resetCart, setNewListAsPrimary])
+
+  // Claim POAP logic temporary for beta testing period
+  const [claimPoapModalOpen, setClaimPoapModalOpen] = useState(false)
+  const [poapLink, setPoapLink] = useState('')
+  const openPoapModal = useCallback(async () => {
+    if (listHasBeenMinted && lists?.lists?.length === 0 && !!profile?.ens.name) {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${userAddress}/poap`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+
+        const data = await res.json()
+        if (data.link) {
+          setPoapLink(data.link)
+          setClaimPoapModalOpen(true)
+        }
+      } catch (err: unknown) {
+        return
+      }
+    }
+  }, [listHasBeenMinted])
 
   return {
     chains,
     actions,
     onFinish,
+    poapLink,
     currentStep,
+    openPoapModal,
     setCurrentStep,
     selectedChain,
     selectedChainId,
+    claimPoapModalOpen,
     setSelectedChainId,
     handleChainClick,
     handleNextStep,
+    setClaimPoapModalOpen,
     handleInitiateActions,
     handleNextAction,
     setNewListAsPrimary,

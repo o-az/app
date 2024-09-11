@@ -1,13 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { useAccount } from 'wagmi'
-import { IoMdSettings } from 'react-icons/io'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import { cn } from '#/lib/utilities'
 import useUser from '../hooks/useUser'
+import TopEight from '#/components/top-eight'
 import { PROFILE_TABS } from '#/lib/constants'
 import type { ProfileTabType } from '#/types/common'
 import ListSettings from '#/components/list-settings'
@@ -25,16 +24,16 @@ interface UserInfoProps {
 const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
   const searchParams = useSearchParams()
   const initialBlockedOpen = searchParams.get('modal') === 'blockmutelists'
+  const defaultParam = (searchParams.get('tab') as ProfileTabType) ?? 'following'
 
   const [isSaving, setIsSaving] = useState(false)
   const [listSettingsOpen, setListSettingsOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<ProfileTabType>('following')
+  const [activeTab, setActiveTab] = useState<ProfileTabType>(defaultParam)
   const [isBlockedMutedOpen, setIsBlockedMutedOpen] = useState(initialBlockedOpen)
 
   const router = useRouter()
   const pathname = usePathname()
   const { t } = useTranslation()
-  const { address: connectedUserAddress } = useAccount()
 
   const isLoadPage = pathname === '/loading'
 
@@ -193,6 +192,13 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
     )
   }[activeTab]
 
+  const titleRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (titleRef.current && !!searchParams.get('tab')) {
+      titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [searchParams])
+
   return (
     <>
       {isBlockedMutedOpen && profile && (
@@ -227,7 +233,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
       )}
       {!isSaving && (
         <>
-          <div className='flex flex-col w-full xl:w-fit items-center gap-4'>
+          <div className='flex flex-col w-full xl:w-fit items-center gap-6'>
             <UserProfileCard
               profileList={
                 userIsList
@@ -238,32 +244,14 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
               }
               profile={profile}
               isLoading={profileIsLoading}
-              showMoreOptions={
-                profile?.address?.toLowerCase() !== connectedUserAddress?.toLowerCase()
-              }
+              showMoreOptions={true}
+              openBlockModal={() => {
+                setIsBlockedMutedOpen(true)
+                router.push(`/${user}?modal=blockmutelists`)
+              }}
+              openListSettingsModal={() => setListSettingsOpen(true)}
             />
-            <div className='flex flex-col gap-1 items-center'>
-              {profile?.address && (
-                <p
-                  onClick={() => {
-                    setIsBlockedMutedOpen(true)
-                    router.push(`/${user}?modal=blockmutelists`)
-                  }}
-                  className='font-bold cursor-pointer hover:opacity-80 hover:scale-110 transition-all'
-                >
-                  {t('block-mute')}
-                </p>
-              )}
-              {profile?.address && (profile?.primary_list || userIsList) && (
-                <div
-                  className='flex gap-1 cursor-pointer items-center hover:opacity-80 hover:scale-110 transition-all'
-                  onClick={() => setListSettingsOpen(true)}
-                >
-                  <p className='font-bold '>{t('settings')}</p>
-                  <IoMdSettings className='text-xl' />
-                </div>
-              )}
-            </div>
+            <TopEight user={user} isConnectedUserProfile={isMyProfile} />
           </div>
           <UserProfilePageTable
             isLoading={followingIsLoading}
@@ -284,7 +272,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
               roles?.isManager
             }
             title='following'
-            customClass='hidden xl:flex xl:max-w-[520px] 2xl:max-w-[40%]'
+            customClass='hidden xl:flex xl:max-w-[520px] z-10 2xl:max-w-[40%]'
           />
           <UserProfilePageTable
             isLoading={followersIsLoading}
@@ -303,8 +291,14 @@ const UserInfo: React.FC<UserInfoProps> = ({ user }) => {
             title='followers'
             customClass='hidden xl:flex xl:max-w-[520px] 2xl:max-w-[40%]'
           />
-          <div className='w-full mt-12 relative xl:hidden'>
-            <div className='w-full absolute -top-[50px] left-0'>
+          <div
+            ref={titleRef}
+            className='w-full pt-14 relative xl:hidden'
+            style={{
+              scrollMarginTop: '100px'
+            }}
+          >
+            <div className='w-full absolute top-[6px] left-0'>
               {PROFILE_TABS.map(option => (
                 <button
                   key={option}

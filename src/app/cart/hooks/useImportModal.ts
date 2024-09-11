@@ -12,14 +12,31 @@ init('0366bbe276e04996af5f92ebb7899f19', { env: 'dev', cache: true })
 const useImportModal = (platform: ImportPlatformType) => {
   const [handle, setHandle] = useState('')
   const [currHandle, setCurrHandle] = useState('')
-  const [followings, setFollowings] = useState<Address[]>([])
+
+  const [followings, setFollowings] = useState<
+    {
+      address: Address
+      domains: { name: string }[]
+    }[]
+  >([])
+  const [allFollowings, setAllFollowings] = useState<
+    {
+      address: Address
+      domains: { name: string }[]
+    }[]
+  >([])
+  const [onlyImportWithEns, setOnlyImportWithEns] = useState(true)
   const [isFollowingsLoading, setIsFollowingsLoading] = useState(false)
 
   const { cartItems, setCartItems, getAddressesFromCart } = useCart()
   const { allFollowingAddresses } = useEFPProfile()
 
   useEffect(() => {
-    const inputTimeout = setTimeout(() => setHandle(currHandle), 500)
+    const inputTimeout = setTimeout(() => {
+      setHandle(currHandle)
+      setFollowings([])
+      setAllFollowings([])
+    }, 500)
     return () => clearTimeout(inputTimeout)
   }, [currHandle])
 
@@ -27,9 +44,7 @@ const useImportModal = (platform: ImportPlatformType) => {
   const profileQuery = `
     query ProfileQuery ($platform: SocialDappName) {
       Socials(
-        input: {filter: {dappName: {_eq: $platform}, profileName: {_eq: "${
-          platform === 'lens' ? 'lens/@' : ''
-        }${handle.replace('@', '')}"}}, blockchain: ethereum, limit: 1}
+        input: {filter: {dappName: {_eq: $platform}, profileName: {_eq: "${handle.replace('@', '')}"}}, blockchain: ethereum, limit: 1}
       ) {
         Social {
           profileImage
@@ -66,6 +81,9 @@ const useImportModal = (platform: ImportPlatformType) => {
       Following {
         followingAddress {
           addresses
+          domains(input: {limit: 1}) {
+            name
+          }
         }
       }
     }
@@ -81,6 +99,7 @@ const useImportModal = (platform: ImportPlatformType) => {
   } = useQueryWithPagination(followingsQuery, { platform })
 
   useEffect(() => {
+    if (currHandle !== handle) return
     if (!hasPrevPage) setFollowings([])
     if (hasNextPage) getNextPage()
     if (
@@ -89,40 +108,62 @@ const useImportModal = (platform: ImportPlatformType) => {
     ) {
       setIsFollowingsLoading(true)
       const newFollowingAddresses = fetchedFollowings?.SocialFollowings?.Following.map(
-        (following: any) => following.followingAddress.addresses?.[0]
+        (following: any) => ({
+          address: following.followingAddress.addresses?.[0],
+          domains: following.followingAddress?.domains ? following.followingAddress.domains : null
+        })
       )
-      setFollowings(currFollowings => [...currFollowings, ...newFollowingAddresses])
+      const filteredNewFollowingAddresses = newFollowingAddresses.filter((following: any) =>
+        onlyImportWithEns ? !!following.domains : true
+      )
+      setAllFollowings(currFollowings => [
+        ...new Set([...currFollowings, ...newFollowingAddresses])
+      ])
+      setFollowings(currFollowings => [
+        ...new Set([...currFollowings, ...filteredNewFollowingAddresses])
+      ])
     }
     if (!hasNextPage) setIsFollowingsLoading(false)
   }, [fetchedFollowings])
 
+  useEffect(() => {
+    if (!allFollowings || allFollowings.length === 0) return
+
+    const newFollowingAddresses = allFollowings.filter((following: any) =>
+      onlyImportWithEns ? !!following.domains : true
+    )
+    setFollowings(newFollowingAddresses)
+  }, [onlyImportWithEns])
+
   const onAddFollowings = () => {
     const newCartItems = followings
       .filter(
-        addr =>
+        ({ address: addr }) =>
           !(
             allFollowingAddresses?.includes(addr.toLowerCase()) ||
             getAddressesFromCart().includes(addr.toLowerCase())
           )
       )
       .map(followingAddress => ({
-        listOp: listOpAddListRecord(followingAddress as Address),
+        listOp: listOpAddListRecord(followingAddress.address as Address),
         import: platform
       }))
 
     setCartItems([...cartItems, ...newCartItems])
   }
 
-  const alreadyFollow = followings.filter(addr =>
+  const alreadyFollow = followings.filter(({ address: addr }) =>
     allFollowingAddresses?.includes(addr.toLowerCase())
   )
 
   // add query to fetch airstack profile and all following addresses, download AIrstack SDK
   return {
+    followings,
     currHandle,
     setCurrHandle,
     socialProfile,
-    followings,
+    onlyImportWithEns,
+    setOnlyImportWithEns,
     isSocialProfileLoading,
     isFollowingsLoading: isFollowingsLoading || isFetchedFollowingsLoading,
     onAddFollowings,
