@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: 'Home | EFP',
     siteName: 'App - Ethereum Follow Protocol',
     description: 'Social graph for Ethereum',
-    url: 'https://ethfollow.xyz',
+    url: 'https://development.ethfollow.xyz',
     images: [
       {
         url: 'https://ethfollow.xyz/assets/banners/home.png'
