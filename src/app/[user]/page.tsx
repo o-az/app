@@ -1,5 +1,6 @@
-import { isAddress } from 'viem'
 import type { Metadata } from 'next'
+import { isAddress, isHex } from 'viem'
+
 import UserInfo from './components/user-info'
 import { truncateAddress } from '#/lib/utilities'
 
@@ -12,7 +13,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const truncatedUser = isAddress(params.user)
     ? (truncateAddress(params.user) as string)
     : params.user
-  const isList = Number.isInteger(Number(user)) && !isAddress(user)
+  const isList = Number.isInteger(Number(user)) && !(isAddress(user) || isHex(user))
 
   return {
     title: `${isList ? `List #${user}` : truncatedUser} | EFP`,
@@ -20,15 +21,15 @@ export function generateMetadata({ params }: Props): Metadata {
       title: `${isList ? `List #${user}` : truncatedUser} | EFP`,
       siteName: `${isList ? `List #${user}` : truncatedUser} - EFP profile`,
       description: `${isList ? `List #${user}` : truncatedUser} - EFP profile`,
-      url: `https://testing.ethfollow.xyz/${user}`,
+      url: `https://ethfollow.xyz/${user}`,
       images: [
         {
-          url: `https://testing.ethfollow.xyz/og?user=${user}`
+          url: `https://ethfollow.xyz/og?user=${user}`
         }
       ]
     },
     twitter: {
-      images: `https://testing.ethfollow.xyz/og?user=${user}`
+      images: `https://ethfollow.xyz/og?user=${user}`
     }
   }
 
@@ -56,15 +57,15 @@ export function generateMetadata({ params }: Props): Metadata {
   //       title: `${fetchedUser} | EFP`,
   //       siteName: `${fetchedUser} - EFP profile`,
   //       description: `${fetchedUser} - EFP profile`,
-  //       url: `https://testing.ethfollow.xyz/${response.address ? response.address : user}`,
+  //       url: `https://ethfollow.xyz/${response.address ? response.address : user}`,
   //       images: [
   //         {
-  //           url: `https://testing.ethfollow.xyz/og?user=${user}`
+  //           url: `https://ethfollow.xyz/og?user=${user}`
   //         }
   //       ]
   //     },
   //     twitter: {
-  //       images: `https://testing.ethfollow.xyz/og?user=${user}`
+  //       images: `https://ethfollow.xyz/og?user=${user}`
   //     }
   //   }
   // } catch (err: unknown) {

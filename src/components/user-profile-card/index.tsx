@@ -11,9 +11,11 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useClickAway } from '@uidotdev/usehooks'
 import { MdOutlineContentCopy } from 'react-icons/md'
+import { ens_beautify } from '@adraffy/ens-normalize'
 import { HiOutlineExternalLink } from 'react-icons/hi'
-import { usePathname, useRouter } from 'next/navigation'
+import { PiArrowElbowRightUpBold } from 'react-icons/pi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import {
   listOpAddTag,
@@ -29,16 +31,16 @@ import { profileCardSocials } from '#/lib/constants'
 import { cn, truncateAddress } from '#/lib/utilities'
 import FollowButton from '#/components/follow-button'
 import ImageWithFallback from '../image-with-fallback'
+import useFollowerState from '#/hooks/use-follower-state'
 import CommonFollowers from './components/common-followers'
+import useFollowingState from '#/hooks/use-following-state'
 import { useEFPProfile } from '#/contexts/efp-profile-context'
-import type { ProfileDetailsResponse } from '#/types/requests'
 import { isValidEnsName, resolveEnsProfile } from '#/utils/ens'
 import DefaultAvatar from 'public/assets/art/default-avatar.svg'
 import DefaultHeader from 'public/assets/art/default-header.svg'
 import { useCoolMode } from '../follow-button/hooks/useCoolMode'
 import LoadingProfileCard from './components/loading-profile-card'
-import useFollowingState from '#/hooks/use-following-state'
-import useFollowerState from '#/hooks/use-follower-state'
+import type { ProfileDetailsResponse, StatsResponse } from '#/types/requests'
 
 interface UserProfileCardProps {
   profileList?: number | null
@@ -46,6 +48,8 @@ interface UserProfileCardProps {
   hideFollowButton?: boolean
   profile?: ProfileDetailsResponse | null
   isLoading?: boolean
+  isStatsLoading?: boolean
+  stats?: StatsResponse | null
   showMoreOptions?: boolean
   openBlockModal?: () => void
   openListSettingsModal?: () => void
@@ -56,7 +60,9 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   isResponsive = true,
   hideFollowButton,
   profile,
+  stats,
   isLoading,
+  isStatsLoading,
   showMoreOptions,
   openBlockModal,
   openListSettingsModal
@@ -86,16 +92,23 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
   const profileName = fetchedEnsProfile?.name
   const profileAvatar = fetchedEnsProfile?.avatar
 
-  const { followingState: followState } = useFollowingState({ address: profile?.address })
-  const { followerTag } = useFollowerState({ address: profile?.address })
-
   const router = useRouter()
   const { t } = useTranslation()
   const pathname = usePathname()
   const { resolvedTheme } = useTheme()
-  const { selectedList, topEight } = useEFPProfile()
   const { openConnectModal } = useConnectModal()
+  const { selectedList, topEight } = useEFPProfile()
   const { address: connectedAddress } = useAccount()
+
+  const isHome = pathname === '/'
+
+  const searchParams = useSearchParams()
+  const searchURLParam = searchParams.get('search')
+  const hasSearchedDifferentName =
+    searchURLParam &&
+    searchURLParam.length > 0 &&
+    searchURLParam !== profileName &&
+    !Number(searchURLParam)
 
   const isConnectedUserCard =
     pathname === '/' ||
@@ -104,6 +117,12 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
         ? selectedList === Number(profile?.primary_list)
         : true)) ||
     pathname === `/${selectedList?.toString() ?? connectedAddress}`
+
+  const { followingState: followState } = useFollowingState({ address: profile?.address })
+  const { followerTag } = useFollowerState({
+    address: profile?.address,
+    showFollowerBadge: !isConnectedUserCard
+  })
 
   const isProfileValid = !(
     Object.keys(profile || {}).includes('response') ||
@@ -236,7 +255,11 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
     <div
       className={cn(
         'flex glass-card border-[3px] z-10 flex-col border-[#FFDBD9] dark:border-[#a36d7d] rounded-xl relative',
-        isResponsive ? 'xl:w-76 w-full 2xl:w-86' : 'w-80 3xs:w-92'
+        isResponsive
+          ? isHome
+            ? 'w-full xl:w-86 xl:min-w-86'
+            : 'xl:w-76 w-full 2xl:w-86'
+          : 'w-80 xxs:w-92'
       )}
     >
       {isLoading ? (
@@ -292,10 +315,10 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
             ) : null}
           </div>
           {isProfileLoading ? (
-            <LoadingCell className='w-full h-[120px] absolute top-0 left-0' />
+            <LoadingCell className='w-full h-[120px] absolute top-0 left-0 rounded-t-lg' />
           ) : (
             <ImageWithFallback
-              src={profile.ens.header || DefaultHeader}
+              src={profile.ens.records?.header || DefaultHeader}
               fallback={DefaultHeader}
               alt='profile header'
               width={360}
@@ -334,19 +357,29 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     <LoadingCell className='w-48 sm:w-68 xl:w-3/4 h-7 rounded-lg' />
                   ) : (
                     <div
-                      className={`${
+                      className={cn(
+                        'font-bold flex gap-2 items-center relative text-center',
                         isResponsive
                           ? 'max-w-[90%] xl:max-w-72 relative 2xl:max-w-[325px] sm:text-2xl text-xl'
-                          : 'max-w-[332px] text-2xl'
-                      } font-bold flex gap-2 items-center relative text-center`}
+                          : 'max-w-[332px] text-2xl',
+                        hasSearchedDifferentName && 'mb-[22px]'
+                      )}
                     >
+                      {hasSearchedDifferentName && (
+                        <div className='absolute -bottom-[22px] w-full flex justify-center'>
+                          <div className=' flex items-center gap-1 rounded-full px-2 py-0.5 bg-darkGrey dark:bg-white text-white dark:text-darkGrey'>
+                            <p className='text-xs'>{searchURLParam}</p>
+                            <PiArrowElbowRightUpBold className='text-sm -translate-y-[2px]' />
+                          </div>
+                        </div>
+                      )}
                       <Link
                         href={`/${profile.address}`}
                         className={showMoreOptions ? 'w-[87.5%]' : 'w-full'}
                       >
                         <p className='truncate hover:opacity-70 hover:scale-105 transition-all'>
                           {profileName && isValidEnsName(profileName)
-                            ? profileName
+                            ? ens_beautify(profileName)
                             : truncateAddress(profile.address)}
                         </p>
                       </Link>
@@ -365,14 +398,14 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         <div
                           className={`${
                             showMoreOptions && moreOptionsDropdownOpen ? 'flex' : 'hidden'
-                          } absolute top-9 right-0 flex-col items-center z-50 gap-2 w-fit p-1 dark:border-zinc-600  dark:bg-darkGrey/95 bg-white/95 border-zinc-200 border-[3px] rounded-xl drop-shadow-lg`}
+                          } absolute top-9 right-0 flex-col items-center z-50 gap-2 w-fit p-1 dark:border-zinc-600  dark:bg-darkGrey bg-white border-zinc-200 border-[3px] rounded-xl drop-shadow-lg`}
                         >
                           {!isConnectedUserCard && (
                             <>
                               <button
                                 ref={blockCoolMode as Ref<HTMLButtonElement>}
                                 onClick={() => onClickOption('Block')}
-                                className='rounded-lg cursor-pointer bg-deletion mt-3 mb-2 hover:bg-[#CF4C4C] text-darkGrey transition-all hover:scale-110 relative text-sm flex items-center gap-1.5 justify-center font-bold w-[109px] h-[37px] px-2 py-1.5'
+                                className='rounded-lg cursor-pointer bg-deletion mt-3 mb-2 hover:bg-[#CF4C4C] text-darkGrey transition-all hover:scale-110 relative text-sm flex items-center gap-1.5 justify-center font-bold w-[120px] h-[40px] px-2 py-1.5'
                               >
                                 <Image
                                   alt='mainnet logo'
@@ -380,7 +413,12 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                   width={16}
                                   height={16}
                                 />
-                                <p>
+                                <p
+                                  className='max-w-20 break-words text-wrap'
+                                  style={{
+                                    lineHeight: '0.95rem'
+                                  }}
+                                >
                                   {t(
                                     followState === 'blocks'
                                       ? isPendingUnblock
@@ -395,7 +433,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                               <button
                                 ref={muteCoolMode as Ref<HTMLButtonElement>}
                                 onClick={() => onClickOption('Mute')}
-                                className='rounded-lg cursor-pointer bg-deletion hover:bg-[#CF4C4C] text-darkGrey transition-all hover:scale-110 relative text-sm flex items-center gap-1.5 justify-center font-bold w-[109px] h-[37px] px-2 py-1.5'
+                                className='rounded-lg cursor-pointer bg-deletion hover:bg-[#CF4C4C] text-darkGrey transition-all hover:scale-110 relative text-sm flex items-center gap-1.5 justify-center font-bold w-[120px] h-[40px] px-2 py-1.5'
                               >
                                 <Image
                                   alt='mainnet logo'
@@ -403,7 +441,12 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                   width={16}
                                   height={16}
                                 />
-                                <p>
+                                <p
+                                  className='max-w-20 break-words text-wrap'
+                                  style={{
+                                    lineHeight: '0.95rem'
+                                  }}
+                                >
                                   {t(
                                     followState === 'mutes'
                                       ? isPendingUnmute
@@ -461,7 +504,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                           <button
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                `${process.env.NEXT_PUBLIC_SITE_URL}/${
+                                `https://ethfollow.xyz/${
                                   profileList
                                     ? profileList === Number(profile.primary_list)
                                       ? profile.address
@@ -532,7 +575,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                   )}
                   {followerTag && connectedAddress && !isConnectedUserCard && (
                     <div
-                      className={`rounded-full font-bold text-[10px] mb-1 flex items-center justify-center text-darkGrey bg-zinc-300 h-5 w-20 ${followerTag.className}`}
+                      className={`rounded-full font-bold text-[10px] mb-1 flex items-center justify-center text-darkGrey bg-zinc-300 h-5 px-2 w-fit ${followerTag.className}`}
                     >
                       {t(followerTag.text)}
                     </div>
@@ -561,7 +604,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                       <i>{t('no bio')}</i>
                     )}
                   </p>
-                  <div className='w-full flex justify-center gap-2 items-center mb-1'>
+                  <div className='w-full flex justify-center gap-2 flex-wrap items-center'>
                     {profile.ens.records?.url && (
                       <a
                         href={`https://${profile.ens.records.url
@@ -569,9 +612,9 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                           .replace('http://', '')}`}
                         target='_blank'
                         rel='noreferrer'
-                        className='flex items-center text-sm gap-1 bg-zinc-200 dark:bg-zinc-500 rounded-full py-0.5 px-2 hover:scale-110 transition-all'
+                        className='flex max-w-48 items-center text-sm gap-1 mb-1 bg-zinc-200 dark:bg-zinc-500 rounded-full py-0.5 px-2 hover:scale-110 transition-all'
                       >
-                        <p className='dark:text-blue-400 text-blue-600 font-semibold'>
+                        <p className='dark:text-blue-400 text-blue-600 max-w-[90%] truncate font-semibold'>
                           {profile.ens.records?.url.slice(-1) === '/'
                             ? profile.ens.records?.url.replace('https://', '').slice(0, -1)
                             : profile.ens.records?.url.replace('https://', '')}
@@ -584,7 +627,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         href={`https://${profile.ens.name}.limo`}
                         target='_blank'
                         rel='noreferrer'
-                        className='flex items-center text-sm gap-1 bg-zinc-200 dark:bg-zinc-500 rounded-full py-0.5 px-2 pr-0.5 hover:scale-110 transition-all'
+                        className='flex items-center text-sm gap-1 mb-1 bg-zinc-200 dark:bg-zinc-500 rounded-full py-0.5 px-2 pr-0.5 hover:scale-110 transition-all'
                       >
                         <p className='dark:text-blue-400 text-blue-600 font-semibold'>dweb</p>
                         <Image
@@ -644,19 +687,17 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                   )
                 }
               >
-                <div className='text-2xl sm:text-2xl text-center font-bold'>
-                  {profile.stats === undefined
-                    ? '-'
-                    : profileList
-                      ? formatNumber(profile.stats.following_count)
-                      : 0}
-                  {/* // ? '-'
-                    // : isConnectedUserCard && profileList === undefined
-                    //   ? 0
-                    //   : profileList
-                    //     ? formatNumber(profile.stats.following_count)
-                    //     : 0 */}
-                </div>
+                {isStatsLoading ? (
+                  <LoadingCell className='w-12 h-6 mb-1 rounded-lg mx-auto' />
+                ) : (
+                  <div className='text-xl sm:text-2xl text-center font-bold'>
+                    {stats
+                      ? profileList !== undefined
+                        ? formatNumber(stats?.following_count || 0)
+                        : 0
+                      : '-'}
+                  </div>
+                )}
                 <div className='text-lg font-bold text-[#888] dark:text-[#aaa]'>
                   {t('following')}
                 </div>
@@ -677,9 +718,13 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                   )
                 }
               >
-                <div className='text-xl sm:text-2xl text-center font-bold'>
-                  {profile.stats === undefined ? '-' : formatNumber(profile.stats.followers_count)}
-                </div>
+                {isStatsLoading ? (
+                  <LoadingCell className='w-12 h-6 mb-1 rounded-lg mx-auto' />
+                ) : (
+                  <div className='text-xl sm:text-2xl text-center font-bold'>
+                    {stats ? formatNumber(stats.followers_count) : '-'}
+                  </div>
+                )}
                 <div className='text-lg font-bold text-[#888] dark:text-[#aaa]'>
                   {t('followers')}
                 </div>
@@ -697,25 +742,32 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 <div className='flex xl:flex-col w-full justify-center flex-wrap gap-x-4 gap-y-0 xxs:gap-y-0 xxs:gap-x-8 xl:gap-0'>
                   {ranks.map((rank, i) => (
                     <Link
-                      href={`/leaderboard?filter=${t(rankTitles[i] || '').toLowerCase()}`}
+                      href={`/leaderboard?filter=${{
+                        mutuals_rank: 'mutuals',
+                        followers_rank: 'followers',
+                        following_rank: 'following',
+                        top8_rank: 'top8',
+                        blocks_rank: 'blocked'
+                      }[rankTitles[i] || '']
+                        ?.replaceAll(' ', '')
+                        ?.toLowerCase()}`}
                       key={rankTitles[i]}
+                      className='w-full mx-[7.5%] 3xs:mx-[10%] xxs:mx-[15%] xs:mx-0 xs:w-fit xl:w-full flex gap-3 justify-between text-lg items-center font-bold px-3 py-1 rounded-lg dark:hover:bg-darkGrey/40 hover:bg-darkGrey/5 transition-all'
                     >
-                      <div className='flex w-full 3xs:w-fit xl:w-full gap-3 justify-between text-lg items-center font-bold px-3 py-1 rounded-lg dark:hover:bg-darkGrey/40 hover:bg-darkGrey/5 transition-all'>
-                        <p className='font-bold text-[#888] dark:text-[#aaa]'>
-                          {t(rankTitles[i] || '')}
-                        </p>
-                        <p
-                          className={
-                            {
-                              1: 'first-place text-xl',
-                              2: 'second-place text-xl',
-                              3: 'third-place text-xl'
-                            }[rank]
-                          }
-                        >
-                          #{formatNumber(rank) || '-'}
-                        </p>
-                      </div>
+                      <p className='font-bold text-[#888] text-start dark:text-[#aaa]'>
+                        {t(rankTitles[i] || '')}
+                      </p>
+                      <p
+                        className={
+                          {
+                            1: 'first-place text-xl',
+                            2: 'second-place text-xl',
+                            3: 'third-place text-xl'
+                          }[rank]
+                        }
+                      >
+                        #{formatNumber(rank) || '-'}
+                      </p>
                     </Link>
                   ))}
                 </div>

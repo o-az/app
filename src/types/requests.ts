@@ -82,7 +82,7 @@ export interface FollowerResponse {
 export interface FollowingResponse {
   version: 1
   record_type: 'address' & string
-  data: Address
+  address: Address
   tags: string[]
   ens?: ENSProfile
 }
@@ -104,7 +104,9 @@ export type LeaderboardItem = {
   mutuals_rank: string
   followers_rank: string
   following_rank: string
+  top8_rank: string
   blocks_rank: string
+  top8?: string
   following?: string
   followers: string
   blocks?: string

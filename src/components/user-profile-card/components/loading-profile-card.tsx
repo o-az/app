@@ -19,7 +19,7 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
   // const { resolvedTheme } = useTheme()
   const { openConnectModal } = useConnectModal()
 
-  const ranks = ['mutuals_rank', 'followers_rank', 'following_rank', 'blocks_rank']
+  const ranks = ['mutuals_rank', 'followers_rank', 'following_rank', 'top8_rank', 'blocks_rank']
 
   return (
     <>
@@ -38,7 +38,7 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
       <div className='pointer-events-none text-zinc-500 absolute flex justify-start px-2 w-full left-0 top-1 font-bold'>
         <LoadingCell isStatic={isStatic} className='w-10 h-5 mt-1 rounded-lg' />
       </div>
-      <LoadingCell className='w-full h-[120px] absolute top-0 left-0 -z-10' />
+      <LoadingCell className='w-full h-[120px] absolute top-0 rounded-t-lg left-0 -z-10' />
 
       <div
         className={`pointer-events-none flex w-full xl:items-center flex-col pt-8 px-4 sm:p-6 sm:pt-9 pb-6 ${
@@ -55,7 +55,7 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
             <div className='flex flex-col items-center justify-center gap-2 w-full'>
               <LoadingCell isStatic={isStatic} className='w-48 sm:w-68 xl:w-3/4 h-7 rounded-lg' />
               {!hideFollowButton && (
-                <LoadingCell isStatic={isStatic} className='w-[107px] h-9 rounded-lg' />
+                <LoadingCell isStatic={isStatic} className='w-[120px] h-10 rounded-lg' />
               )}
             </div>
             <LoadingCell isStatic={isStatic} className='w-4/5 h-5 rounded-lg' />
@@ -103,7 +103,7 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
           </div>
         </div>
       </div>
-      {!hideFollowButton && (
+      {/* {!hideFollowButton && (
         <div className='w-full flex items-center mx-auto max-w-108 justify-center gap-2 p-4 pt-0'>
           <div className='flex items-center'>
             <LoadingCell isStatic={isStatic} className='w-9 h-9 rounded-full z-0 ' />
@@ -116,7 +116,7 @@ const LoadingProfileCard: React.FC<LoadingProfileCardProps> = ({
             style={{ width: 'calc(100% - 80px)' }}
           />
         </div>
-      )}
+      )} */}
     </>
   )
 }

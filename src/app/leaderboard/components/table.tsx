@@ -53,7 +53,9 @@ const LeaderboardTable = () => {
     const params = new URLSearchParams()
     params.set('filter', newFilter)
     if (search) params.set('query', search)
-    router.push(`/leaderboard?${params.toString()}`)
+    router.push(`/leaderboard?${params.toString()}`, {
+      scroll: false
+    })
   }
 
   const isLoading =
@@ -63,12 +65,13 @@ const LeaderboardTable = () => {
     followers: (entry: LeaderboardItem) => entry.followers_rank,
     following: (entry: LeaderboardItem) => entry.following_rank,
     mutuals: (entry: LeaderboardItem) => entry.mutuals_rank,
+    top8: (entry: LeaderboardItem) => entry.top8_rank,
     blocked: (entry: LeaderboardItem) => entry.blocks_rank
   }[filter]
 
   return (
     <>
-      <h1 className='text-3xl sm:text-4xl md:text-5xl font-bold'>{t('leaderboard')}</h1>
+      <p className='text-3xl sm:text-4xl md:text-5xl font-bold'>{t('leaderboard')}</p>
       <div className='mt-4 sm:mt-6 mb-4 sm:mb-6 lg:mb-0 flex items-center justify-center flex-wrap gap-4 xs:gap-8'>
         <div className='gradient-border flex flex-col rounded-2xl items-center justify-center h-24 xs:h-[118px] w-full xs:w-64'>
           {isLeaderboardStatsLoading ? (
@@ -105,13 +108,13 @@ const LeaderboardTable = () => {
           </p>
         </div>
       </div>
-      <div className='flex w-full gap-1.5 justify-center lg:justify-end max-w-[1200px] text-sm mt-4 font-bold text-[#aaaaaa] md:text-[#CDCDCD] italic'>
+      <div className='flex w-full gap-1.5 justify-center lg:justify-end max-w-[1300px] text-sm mt-4 font-bold text-[#aaaaaa] md:text-[#CDCDCD] italic'>
         {t('last updated')}
         <span>
           {isLeaderboardLoading ? <LoadingCell className='h-5 w-16 rounded-md' /> : timeStamp}
         </span>
       </div>
-      <div className='flex flex-col gap-6 w-full max-w-[1200px]'>
+      <div className='flex flex-col gap-6 w-full max-w-[1300px]'>
         <div className='flex w-full flex-wrap justify-center lg:hidden items-center gap-4'>
           {leaderboardFilters.map((item, i) => (
             <div
@@ -123,7 +126,7 @@ const LeaderboardTable = () => {
               }`}
               onClick={() => onSelectFilter(item)}
             >
-              <p>{t(item)}</p>
+              <p className='text-nowrap'>{t(item)}</p>
               <Image src={leaderboardFiltersEmojies[i]} alt={item} width={22} height={22} />
             </div>
           ))}
@@ -161,7 +164,7 @@ const LeaderboardTable = () => {
                 }`}
                 onClick={() => onSelectFilter(item)}
               >
-                <p>{t(item)}</p>
+                <p className='text-nowrap'>{t(item)}</p>
                 <Image src={leaderboardFiltersEmojies[i]} alt={item} width={22} height={22} />
               </div>
             ))}
@@ -170,6 +173,7 @@ const LeaderboardTable = () => {
             page={page}
             setPage={setPage}
             hasNextPage={true}
+            scrollUp={true}
             isLoading={isFetchingNextLeaderboard || isFetchingPreviousLeaderboard}
             fetchNext={() => {
               setChunk(1)
@@ -194,11 +198,13 @@ const LeaderboardTable = () => {
                 followers={Number(entry.followers) || 0}
                 following={Number(entry.following) || 0}
                 mutuals={Number(entry.mutuals) || 0}
+                top8={Number(entry.top8) || 0}
                 blocked={Number(entry.blocks) || 0}
+                firstStat={filter}
               />
             ))}
           {new Array(isLoading ? LEADERBOARD_CHUNK_SIZE : 0).fill(1).map((_, i) => (
-            <LoadingRow key={i} />
+            <LoadingRow key={i} staticStats={false} />
           ))}
           {(chunk * LEADERBOARD_CHUNK_SIZE) / LEADERBOARD_FETCH_LIMIT_PARAM < 1 &&
             !isLoading &&
@@ -219,6 +225,7 @@ const LeaderboardTable = () => {
         </div>
         <PageSelector
           page={page}
+          scrollUp={true}
           setPage={setPage}
           hasNextPage={true}
           isLoading={isFetchingNextLeaderboard || isFetchingPreviousLeaderboard}

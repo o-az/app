@@ -40,9 +40,11 @@ const useCheckout = () => {
     profile,
     refetchLists,
     selectedList,
-    refetchProfile,
+    refetchStats,
     refetchFollowing,
+    isRefetchingStats,
     refetchFollowingTags,
+    setIsRefetchingStats,
     setIsRefetchingProfile,
     setSetNewListAsSelected,
     setIsRefetchingFollowing
@@ -274,15 +276,21 @@ const useCheckout = () => {
   }, [moveToNextAction, executeActionByIndex, getRequiredChain, currentChainId, currentActionIndex])
 
   const onFinish = useCallback(() => {
-    setIsRefetchingProfile(true)
+    if (isRefetchingStats) refetchStats()
+    else setIsRefetchingStats(true)
     setIsRefetchingFollowing(true)
     queryClient.invalidateQueries({ queryKey: ['top8'] })
     queryClient.invalidateQueries({ queryKey: ['follow state'] })
     queryClient.invalidateQueries({ queryKey: ['list state'] })
 
     if (listHasBeenMinted || selectedList === undefined) {
-      refetchLists()
+      if (setNewListAsPrimary)
+        queryClient.invalidateQueries({ queryKey: ['profile', userAddress, undefined] })
+
+      setIsRefetchingProfile(true)
       setSetNewListAsSelected(true)
+
+      refetchLists()
       router.push('/loading')
       return
     }
@@ -298,7 +306,6 @@ const useCheckout = () => {
       })
     )
 
-    refetchProfile()
     refetchFollowing()
     refetchFollowingTags()
 
@@ -309,9 +316,13 @@ const useCheckout = () => {
 
   // Claim POAP logic temporary for beta testing period
   const [claimPoapModalOpen, setClaimPoapModalOpen] = useState(false)
+  const [poapLoading, setPoapLoading] = useState(false)
   const [poapLink, setPoapLink] = useState('')
   const openPoapModal = useCallback(async () => {
     if (listHasBeenMinted && lists?.lists?.length === 0 && !!profile?.ens.name) {
+      setClaimPoapModalOpen(true)
+      setPoapLoading(true)
+
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_EFP_API_URL}/users/${userAddress}/poap`,
@@ -326,8 +337,9 @@ const useCheckout = () => {
         const data = await res.json()
         if (data.link) {
           setPoapLink(data.link)
-          setClaimPoapModalOpen(true)
         }
+
+        setPoapLoading(false)
       } catch (err: unknown) {
         return
       }
@@ -340,6 +352,7 @@ const useCheckout = () => {
     onFinish,
     poapLink,
     currentStep,
+    poapLoading,
     openPoapModal,
     setCurrentStep,
     selectedChain,

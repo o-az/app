@@ -168,8 +168,8 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   )
 
   return isLoading ? (
-    <div className={`rounded-xl ${isBlockedBy ? 'w-[132px]' : 'w-[109px]'} py-1`}>
-      <LoadingCell className='h-9 w-full rounded-lg' />
+    <div className={`rounded-xl ${isBlockedBy ? 'w-[132px]' : 'w-[120px]'} py-1`}>
+      <LoadingCell className='h-10 w-full rounded-lg' />
     </div>
   ) : (
     <div ref={coolEfpLogo as Ref<HTMLDivElement>}>
@@ -178,7 +178,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
           theme[buttonState].bg,
           theme[buttonState].text,
           theme[buttonState].border,
-          'rounded-xl relative text-sm flex items-center w-[109px] gap-1.5 transition-all px-2 duration-200 justify-center font-bold',
+          'rounded-xl relative text-sm flex items-center w-[120px] gap-1.5 transition-all px-2 duration-200 justify-center font-bold',
           disableHover
             ? buttonState === 'Pending Following'
               ? ''
@@ -187,8 +187,8 @@ const FollowButton: React.FC<FollowButtonProps> = ({
           className
         ])}
         style={{
-          minWidth: isBlockedBy ? '132px' : '107px',
-          height: '37px'
+          minWidth: isBlockedBy ? '132px' : '120px',
+          height: '40px'
         }}
         onMouseLeave={() => {
           setDisableHover(false)
@@ -212,7 +212,14 @@ const FollowButton: React.FC<FollowButtonProps> = ({
           width={16}
           className='pointer-events-none'
         />
-        {t(buttonText)}
+        <p
+          className='text-wrap break-words max-w-[90px]'
+          style={{
+            lineHeight: '0.95rem'
+          }}
+        >
+          {t(buttonText)}
+        </p>
       </button>
     </div>
   )

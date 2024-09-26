@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { isAddress, type Address } from 'viem'
 import { useQuery } from '@tanstack/react-query'
 import { useClickAway } from '@uidotdev/usehooks'
-import { useQueryState } from 'next-usequerystate'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import { useAccount } from 'wagmi'
 import { resolveEnsAddress } from '#/utils/ens'
@@ -21,14 +20,10 @@ const useSearch = (isEditor?: boolean) => {
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState<undefined | boolean>(undefined)
 
-  const searchParams = useSearchParams()
-  const initialSearch = searchParams.get('search')
-  const [currentSearch, setCurrentSearch] = useState(initialSearch ?? '')
-  const [search, setSearch] = useQueryState('search', {
-    history: 'push',
-    parse: value => value?.trim().toLowerCase(),
-    serialize: value => value.trim().toLowerCase()
-  })
+  // const searchParams = useSearchParams()
+  // const initialSearch = searchParams.get('search')
+  const [currentSearch, setCurrentSearch] = useState('')
+  const [search, setSearch] = useState('')
 
   const router = useRouter()
   const pathname = usePathname()
@@ -43,14 +38,14 @@ const useSearch = (isEditor?: boolean) => {
   })
   const searchBarRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 
-  useEffect(() => {
-    if (initialSearch && initialSearch?.length > 0 && searchBarRef) {
-      searchBarRef.current?.focus()
-      searchBarRef.current?.setSelectionRange(initialSearch?.length, initialSearch.length)
-      setDropdownMenuOpen(true)
-      setDialogOpen(true)
-    }
-  }, [searchBarRef])
+  // useEffect(() => {
+  //   if (initialSearch && initialSearch?.length > 0 && searchBarRef) {
+  //     searchBarRef.current?.focus()
+  //     searchBarRef.current?.setSelectionRange(initialSearch?.length, initialSearch.length)
+  //     setDropdownMenuOpen(true)
+  //     setDialogOpen(true)
+  //   }
+  // }, [searchBarRef])
 
   useEffect(() => {
     if (dialogOpen) searchBarRef.current?.focus()
@@ -74,10 +69,38 @@ const useSearch = (isEditor?: boolean) => {
     refetchIntervalInBackground: false,
     enabled: Boolean(searchKey && searchKey.length > 0)
   })
-  const searchResult = searchResultStatus === 'success' ? data.slice(0, 5) : []
+
+  const searchResult =
+    searchResultStatus !== 'pending'
+      ? !data || data.length === 0
+        ? !isEditor &&
+          (!Number.isNaN(Number(searchKey)) ||
+            (searchKey[0] === '#' && !Number.isNaN(Number(searchKey.slice(1)))))
+          ? [
+              {
+                name: `#${searchKey[0] === '#' ? searchKey.slice(1) : searchKey}`,
+                resolvedAddress: null
+              }
+            ]
+          : !isEditor && searchKey.includes('.')
+            ? [
+                {
+                  name: searchKey,
+                  resolvedAddress: null
+                }
+              ]
+            : isAddress(searchKey)
+              ? [
+                  {
+                    name: searchKey,
+                    resolvedAddress: { id: searchKey }
+                  }
+                ]
+              : []
+        : data.slice(0, 5)
+      : []
 
   const resetSearch = () => {
-    setSearch('')
     setCurrentSearch('')
     setDropdownMenuOpen(false)
     searchBarRef.current?.blur()
@@ -187,16 +210,22 @@ const useSearch = (isEditor?: boolean) => {
     }
 
     if (
-      isAddress(currentSearch) ||
-      currentSearch.includes('.') ||
-      !Number.isNaN(Number(currentSearch))
+      !Number.isNaN(Number(currentSearch)) ||
+      (currentSearch[0] === '#' && !Number.isNaN(Number(currentSearch.slice(1))))
     ) {
+      router.push(`/${currentSearch[0] === '#' ? currentSearch.slice(1) : currentSearch}`)
       resetSearch()
+    }
+
+    if (isAddress(currentSearch) || currentSearch.includes('.')) {
       const address = isAddress(currentSearch)
         ? currentSearch
         : await resolveEnsAddress(currentSearch)
 
-      router.push(`/${address || currentSearch}`)
+      router.push(
+        `/${address || currentSearch}${isAddress(currentSearch) ? '' : `?search=${currentSearch}`}`
+      )
+      resetSearch()
     }
   }
 

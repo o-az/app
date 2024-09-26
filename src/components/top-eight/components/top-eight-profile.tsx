@@ -3,9 +3,10 @@ import { HiPlus } from 'react-icons/hi'
 import { IoClose } from 'react-icons/io5'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { ens_beautify } from '@adraffy/ens-normalize'
 
 import { Avatar } from '#/components/avatar'
-import { resolveEnsProfile } from '#/utils/ens'
+import { isValidEnsName, resolveEnsProfile } from '#/utils/ens'
 import { useCart } from '#/contexts/cart-context'
 import { cn, truncateAddress } from '#/lib/utilities'
 import FollowButton from '#/components/follow-button'
@@ -28,7 +29,7 @@ const TopEightProfile: React.FC<TopEightProfileProps> = ({ profile, isEditing })
   const profileName = fetchedEnsProfile?.name
   const profileAvatar = fetchedEnsProfile?.avatar
 
-  const { followerTag } = useFollowerState({ address: profile?.address })
+  const { followerTag } = useFollowerState({ address: profile?.address, showFollowerBadge: true })
 
   const {
     addCartItem,
@@ -102,14 +103,16 @@ const TopEightProfile: React.FC<TopEightProfileProps> = ({ profile, isEditing })
               isEditing ? 'pointer-events-none' : 'hover:scale-110 hover:opacity-75 transition-all'
             )}
           >
-            {profileName || truncateAddress(profile.address)}
+            {profileName && isValidEnsName(profileName)
+              ? ens_beautify(profileName)
+              : truncateAddress(profile.address)}
           </Link>
         )}
       </div>
       {followerTag && (
         <div
           className={cn(
-            'rounded-full absolute font-bold text-[10px] flex bottom-[59px] items-center justify-center bg-zinc-300 h-5 w-20',
+            'rounded-full absolute font-bold text-[10px] flex bottom-[59px] items-center justify-center bg-zinc-300 h-5 min-w-20 w-fit px-1',
             followerTag.className,
             'text-darkGrey'
           )}

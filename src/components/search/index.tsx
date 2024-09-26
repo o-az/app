@@ -1,4 +1,6 @@
 'use client'
+
+import { isAddress } from 'viem'
 import type { LegacyRef } from 'react'
 import { FiSearch } from 'react-icons/fi'
 import { useTranslation } from 'react-i18next'
@@ -40,7 +42,9 @@ export function Search({
       <label htmlFor='search' className='sr-only'>
         Search
       </label>
-      <div className={`rounded-md  gap-2 ${isEditor ? 'flex' : 'hidden md:flex'}`}>
+      <div
+        className={`rounded-md gap-2 ${isEditor ? 'flex flex-col xs:flex-row' : 'hidden 2xl:flex'}`}
+      >
         <div className='w-full relative group'>
           {isEditor ? (
             <>
@@ -128,14 +132,14 @@ export function Search({
         {isEditor && (
           <PrimaryButton
             label={t('add')}
-            className='w-32 h-12 text-lg'
+            className='mx-auto w-full xs:w-32 h-12 text-lg'
             onClick={() => onSubmit()}
           />
         )}
       </div>
       <div
-        className={`absolute glass-card p-3 md:p-4 w-full shadow-md border-[3px] border-zinc-200 dark:border-zinc-500 bg-white/95 dark:bg-darkGrey/95 rounded-xl top-full mt-2 left-0 ${
-          dropdownMenuOpen ? (isEditor ? 'block' : 'hidden md:block') : 'hidden'
+        className={`absolute glass-card p-3 md:p-4 w-full shadow-md border-[3px] border-zinc-200 dark:border-zinc-500 bg-white dark:bg-darkGrey rounded-xl top-full mt-2 left-0 ${
+          dropdownMenuOpen ? (isEditor ? 'block' : 'hidden 2xl:block') : 'hidden'
         }`}
       >
         <div
@@ -161,30 +165,42 @@ export function Search({
                 key={result.name}
                 onClick={() => {
                   if (isEditor && result.resolvedAddress) addToCart(result.resolvedAddress.id)
-                  else router.push(`/${result.resolvedAddress?.id || result.name}`)
+                  else
+                    router.push(
+                      `/${
+                        result.resolvedAddress?.id ||
+                        (result.name[0] === '#' ? result.name.slice(1) : result.name)
+                      }${
+                        isAddress(result.name) || result.name[0] === '#'
+                          ? ''
+                          : `?search=${result.name}`
+                      }`
+                    )
 
                   resetSearch()
                 }}
                 className='max-w-full hover:scale-105 truncate text-md flex items-center hover:opacity-75 gap-1 cursor-pointer transition-all'
               >
                 <p>{result.name}</p>
-                <p className='text-sm text-zinc-400'>
-                  - {truncateAddress(result.resolvedAddress?.id)}
-                </p>
+                {result.resolvedAddress?.id && (
+                  <p className='text-sm text-zinc-400'>
+                    - {truncateAddress(result.resolvedAddress?.id)}
+                  </p>
+                )}
               </div>
             ))
           )}
         </div>
       </div>
-      <div className={` relative z-50 ${isEditor ? 'hidden' : 'md:hidden block'}`}>
+      <div className={` relative z-50 ${isEditor ? 'hidden' : '2xl:hidden block'}`}>
         <FiSearch
           onClick={() => setDialogOpen(true)}
-          className='text-xl hover:scale-125 cursor-pointer transition-all hover:opacity-65'
+          className='text-3xl hover:scale-125 cursor-pointer transition-all hover:opacity-65'
           aria-hidden='true'
         />
         <div
           ref={clickAwayRef}
-          className={`p-0 md:hidden w-[40vw] min-w-68 absolute -top-3 left-0 mx-auto ${
+          className={`p-0 2xl:hidden w-[40vw] min-w-68 max-w-86 absolute -top-3 left-0 mx-auto ${
             dialogOpen ? 'block' : 'hidden'
           }`}
         >
@@ -192,7 +208,7 @@ export function Search({
             <input
               name='search'
               ref={searchBarRef as LegacyRef<HTMLInputElement>}
-              className='h-11 rounded-xl border-[3px] w-full shadow-md border-zinc-200 px-2'
+              className='h-12 block pr-12 w-full  truncate font-medium rounded-xl border-[3px] pl-4 sm:text-sm bg-white dark:bg-darkGrey focus:border- border-[#666] dark:border-white/80 transition-colors'
               spellCheck={false}
               placeholder={t('search placeholder')}
               disabled={disabled}
@@ -216,12 +232,12 @@ export function Search({
             />
           </div>
           <div
-            className={`absolute glass-card w-full shadow-md border-[3px] p-3 rounded-xl border-zinc-200 dark:border-zinc-500 bg-white/95 dark:bg-darkGrey/95 top-full mt-2 left-0 ${
+            className={`absolute glass-card w-full shadow-md border-[3px] p-3 rounded-xl border-zinc-200 dark:border-zinc-500 bg-white dark:bg-darkGrey top-full mt-2 left-0 ${
               dropdownMenuOpen ? 'block' : 'hidden'
             }`}
           >
             <div
-              className='w-full mx-auto min-w-full text-lg py-0 md:hidden block '
+              className='w-full mx-auto min-w-full text-lg py-0 2xl:hidden block '
               ref={clickAwayRef}
               onFocusCapture={event => {
                 event.preventDefault()
@@ -244,16 +260,28 @@ export function Search({
                     key={result.name}
                     onClick={() => {
                       if (isEditor && result.resolvedAddress) addToCart(result.resolvedAddress.id)
-                      else router.push(`/${result.resolvedAddress?.id || result.name}`)
+                      else
+                        router.push(
+                          `/${
+                            result.resolvedAddress?.id ||
+                            (result.name[0] === '#' ? result.name.slice(1) : result.name)
+                          }${
+                            isAddress(result.name) || result.name[0] === '#'
+                              ? ''
+                              : `?search=${result.name}`
+                          }`
+                        )
 
                       resetSearch()
                     }}
                     className='max-w-full truncate text-md flex items-center hover:opacity-75 gap-1 cursor-pointer transition-opacity'
                   >
                     <p>{result.name}</p>
-                    <p className='text-sm text-zinc-400'>
-                      - {truncateAddress(result.resolvedAddress?.id)}
-                    </p>
+                    {result.resolvedAddress?.id && (
+                      <p className='text-sm text-zinc-400'>
+                        - {truncateAddress(result.resolvedAddress?.id)}
+                      </p>
+                    )}
                   </div>
                 ))
               )}

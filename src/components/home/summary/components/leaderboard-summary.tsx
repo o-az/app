@@ -18,13 +18,13 @@ const LeaderboardSummary = () => {
   const displayedEmojies = leaderboardFiltersEmojies.slice((page - 1) * 2, page * 2)
 
   return (
-    <div className='glass-card w-full xl:w-[47.5%] xl:max-w-[900px] rounded-2xl flex flex-col gap-4 p-1 py-3 border-[3px] border-zinc-200 dark:border-zinc-500'>
+    <div className='glass-card w-full xl:w-1/2 xl:max-w-[900px] rounded-2xl flex flex-col gap-4 p-1 py-3 border-[3px] border-zinc-200 dark:border-zinc-500'>
       <div className='w-full flex items-center justify-between p-2 sm:p-4'>
         <h3 className='text-2xl sm:text-3xl font-bold'>{t('leaderboard')}</h3>
         <PageSelector
           page={page}
           setPage={setPage}
-          hasNextPage={page !== 2}
+          hasNextPage={page !== 3}
           hasSkipToFirst={false}
           adjustUrl={false}
           displayPageNumber={false}
@@ -36,13 +36,14 @@ const LeaderboardSummary = () => {
             followers: (entry: LeaderboardItem) => entry.followers_rank,
             following: (entry: LeaderboardItem) => entry.following_rank,
             mutuals: (entry: LeaderboardItem) => entry.mutuals_rank,
+            top8: (entry: LeaderboardItem) => entry.top8_rank,
             blocked: (entry: LeaderboardItem) => entry.blocks_rank
           }[title]
 
           return (
             <div key={title} className='flex flex-col gap-1'>
               <h4 className='text-xl flex gap-2 sm:text-xl font-bold capitalize px-2 sm:px-4'>
-                <p>{title}</p>
+                <p>{t(title)}</p>
                 <Image
                   src={displayedEmojies[index]}
                   alt={title}
@@ -70,6 +71,7 @@ const LeaderboardSummary = () => {
                       followers={Number(entry.followers) || 0}
                       following={Number(entry.following) || 0}
                       mutuals={Number(entry.mutuals) || 0}
+                      top8={Number(entry.top8) || 0}
                       blocked={Number(entry.blocks) || 0}
                     />
                   ))}
